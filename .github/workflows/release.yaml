@@ -32,7 +32,7 @@ jobs:
       - name: Docker release
         run: |
           set -eu
-          docker buildx build --progress plain --platform linux/amd64 --pull --push -t ismdeep/cron:${IMAGE_TAG} .
+          docker buildx build --progress plain --platform linux/amd64,linux/arm64 --pull --push -t ismdeep/cron:${IMAGE_TAG} .
           echo "----------------------------------------------------------------------"
           echo "ismdeep/cron:${IMAGE_TAG}"
           echo "----------------------------------------------------------------------"
