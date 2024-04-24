@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "embed"
 	"fmt"
 	"os"
 	"os/exec"
@@ -10,19 +11,12 @@ import (
 	"github.com/robfig/cron/v3"
 )
 
-func init() {
-	fmt.Println(`
- ######     ########      #######     ##    ## 
-##    ##    ##     ##    ##     ##    ###   ## 
-##          ##     ##    ##     ##    ####  ## 
-##          ########     ##     ##    ## ## ## 
-##          ##   ##      ##     ##    ##  #### 
-##    ##    ##    ##     ##     ##    ##   ### 
- ######     ##     ##     #######     ##    ##
-`)
-}
+//go:embed banner.txt
+var banner string
 
 func main() {
+	fmt.Println(banner)
+
 	cronSpec := os.Getenv("CRON_SPEC")
 	cronCommand := os.Getenv("CRON_COMMAND")
 	cronRunAtStart := os.Getenv("CRON_RUN_AT_START")
