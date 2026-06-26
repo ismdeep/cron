@@ -25,8 +25,6 @@ func runCommandFunc() {
 	defer func() {
 		endedAt := time.Now()
 		log.WithContext(context.Background()).Info("Ended", zap.String("time_elapsed", endedAt.Sub(startedAt).String()))
-		log.WithContext(context.Background()).Info("----------------------------------------------------------------------")
-		fmt.Println()
 	}()
 	cmdSlice := strings.Fields(cronCommand)
 	cmd := exec.Command(cmdSlice[0], cmdSlice[1:]...)
@@ -54,8 +52,6 @@ func main() {
 		panic("CRON_COMMAND is empty")
 	}
 
-	log.WithContext(context.Background()).Info("----------------------------------------------------------------------")
-
 	if cronRunAtStart == "true" {
 		runCommandFunc()
 	}
@@ -70,7 +66,7 @@ func main() {
 	for _, spec := range strings.Split(cronSpec, "\n") {
 		spec = strings.TrimSpace(spec)
 		if spec != "" {
-			log.WithContext(context.Background()).Info("Cron spec", zap.String("spec", spec))
+			log.WithContext(context.Background()).Info("cron info", zap.String("spec", spec), zap.String("command", cronCommand))
 			if _, err := c.AddFunc(spec, runCommandFunc); err != nil {
 				panic(fmt.Errorf("failed to add cron spec '%s': %v", spec, err))
 			}
