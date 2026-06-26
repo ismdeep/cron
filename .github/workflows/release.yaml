@@ -1,38 +1,56 @@
 name: Release
+
 on:
   push:
+    branches:
+      - '**'
+    tags:
+      - '**'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
-  Release:
+  release:
+    name: Build and Publish Release Assets
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       IMAGE_TAG: latest
       BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+
     steps:
-
       - name: Check out code
-        uses: actions/checkout@v1
+        uses: actions/checkout@v6
 
-      - name: Set Env
+      - name: Set env
         if: env.BRANCH_NAME != 'main'
         run: echo "IMAGE_TAG=$(echo ${BRANCH_NAME} | tr / - | tr \# - )" >> $GITHUB_ENV
 
-      - name: Set up Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Login to DockerHub
-        uses: docker/login-action@v2
+      - name: Set up Go
+        uses: actions/setup-go@v6
         with:
-          username: ismdeep
+          go-version-file: go.mod
+
+      - name: Build
+        run: make build
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Docker release
-        run: |
-          set -eu
-          docker buildx build --progress plain --platform linux/amd64,linux/arm64 --pull --push -t ismdeep/cron:${IMAGE_TAG} .
-          echo "----------------------------------------------------------------------"
-          echo "ismdeep/cron:${IMAGE_TAG}"
-          echo "----------------------------------------------------------------------"
+      - name: Docker Release
+        run: docker buildx build --progress plain --platform linux/amd64,linux/arm64 --pull --push --tag ${{ vars.DOCKER_USERNAME }}/cron:${IMAGE_TAG} --file Dockerfile .
+
+      - name: Publish GitHub release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v3
+        with:
+          files: build/*
+          generate_release_notes: true
