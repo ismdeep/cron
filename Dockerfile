@@ -1,13 +1,16 @@
-FROM golang:1.20-bullseye AS builder
-WORKDIR /src
-COPY . .
-RUN set -e; \
-    go mod tidy; \
-    go build -o ./bin/cron -trimpath -ldflags '-s -w' .
+FROM debian:13 AS builder
+WORKDIR /src/
+COPY ./build .
+RUN \
+    case $(uname -m) in \
+    amd64|x86_64)  cp cron_linux_amd64 dism ;; \
+    arm64|aarch64) cp cron_linux_arm64 dism ;; \
+    *) echo "[ERROR] unsupported platform: $(uname -m)" && false ;; \
+    esac
 
-FROM debian:11
-RUN set -e; \
-    apt-get update; \
+FROM debian:13
+RUN \
+    apt-get update && \
     apt-get upgrade -y curl ca-certificates
-COPY --from=builder /src/bin/cron /usr/bin/go-cron
+COPY --from=builder /src/cron /usr/bin/go-cron
 ENTRYPOINT ["/usr/bin/go-cron"]
