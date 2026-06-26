@@ -21,20 +21,19 @@ var cronCommand string
 
 func runCommandFunc() {
 	startedAt := time.Now()
-	log.WithContext(context.Background()).Info("Started")
+	log.WithContext(context.Background()).Info("run cron job ...")
 	defer func() {
 		endedAt := time.Now()
-		log.WithContext(context.Background()).Info("Ended", zap.String("time_elapsed", endedAt.Sub(startedAt).String()))
+		log.WithContext(context.Background()).Info("finished", zap.String("time_elapsed", endedAt.Sub(startedAt).String()))
 	}()
 	cmdSlice := strings.Fields(cronCommand)
 	cmd := exec.Command(cmdSlice[0], cmdSlice[1:]...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
-		log.WithContext(context.Background()).Error("failed to run task", zap.Error(err))
+		log.WithContext(context.Background()).Error("failed to run job", zap.Error(err))
 		return
 	}
-	log.WithContext(context.Background()).Info("Finished")
 }
 
 func main() {
