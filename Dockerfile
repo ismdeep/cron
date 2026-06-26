@@ -3,8 +3,8 @@ WORKDIR /src/
 COPY ./build .
 RUN \
     case $(uname -m) in \
-    amd64|x86_64)  cp cron_linux_amd64 dism ;; \
-    arm64|aarch64) cp cron_linux_arm64 dism ;; \
+    amd64|x86_64)  cp cron_linux_amd64 cron ;; \
+    arm64|aarch64) cp cron_linux_arm64 cron ;; \
     *) echo "[ERROR] unsupported platform: $(uname -m)" && false ;; \
     esac
 
